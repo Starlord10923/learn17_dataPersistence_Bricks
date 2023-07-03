@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using TMPro;
 
 public class MainManager : MonoBehaviour
 {
@@ -10,7 +11,8 @@ public class MainManager : MonoBehaviour
     public int LineCount = 6;
     public Rigidbody Ball;
 
-    public Text ScoreText;
+    public Text bestScoreText;
+    public Text currentScoreText;
     public GameObject GameOverText;
     
     private bool m_Started = false;
@@ -22,6 +24,10 @@ public class MainManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        bestScoreText.text = "Best Score : " + SceneDataManager.Instance.playerName + " : " + SceneDataManager.Instance.bestScore;
+        setLayout();
+    }
+    private void setLayout(){
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
         
@@ -37,7 +43,9 @@ public class MainManager : MonoBehaviour
             }
         }
     }
-
+    public void callNoBricks(){
+        setLayout();
+    }
     private void Update()
     {
         if (!m_Started)
@@ -55,9 +63,18 @@ public class MainManager : MonoBehaviour
         }
         else if (m_GameOver)
         {
+            SceneDataManager.Instance.currentScore = m_Points;
+            if (m_Points > SceneDataManager.Instance.bestScore)
+            {
+                SceneDataManager.Instance.bestScore = m_Points;
+                SceneDataManager.Instance.SavePlayerData();
+            }
             if (Input.GetKeyDown(KeyCode.Space))
             {
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            }
+            if(Input.GetKeyDown(KeyCode.Q)){
+                SceneManager.LoadScene(0);
             }
         }
     }
@@ -65,7 +82,9 @@ public class MainManager : MonoBehaviour
     void AddPoint(int point)
     {
         m_Points += point;
-        ScoreText.text = $"Score : {m_Points}";
+        currentScoreText.text = $"Score : {m_Points}";
+        if(!GameObject.FindGameObjectWithTag("Brick"))
+            setLayout();
     }
 
     public void GameOver()
